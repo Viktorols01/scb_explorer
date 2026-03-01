@@ -1,6 +1,7 @@
 from modules.api_wrapper import ApiWrapper
+from modules.cli_interface import CliInterface
 
-api_wrapper = ApiWrapper()
+from curses import wrapper
 
 
 def print_tables(response):
@@ -26,10 +27,13 @@ def iterate_over_tables():
         page_number += 1
 
 
-def main():
-    response = api_wrapper.get_tables_by_query("polis")
-    print_tables(response)
+def main(stdscr):
+    cli_interface = CliInterface(stdscr)
+    api_wrapper = ApiWrapper()
+    choices = [f"{i}" for i in range(25)]
+    choice = cli_interface.get_choice(choices)
+    cli_interface.show_lines("Selected choice:", choice)
 
 
 if __name__ == "__main__":
-    main()
+    wrapper(main)
