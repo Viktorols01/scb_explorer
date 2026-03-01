@@ -3,6 +3,8 @@ from modules.cli_interface import CliInterface
 
 from curses import wrapper
 
+from explore_table_metadata import explore_table_metadata
+
 
 def print_tables(response):
     for table in response["tables"]:
@@ -15,24 +17,25 @@ def print_tables(response):
         # yooo jag borde hämta metadata istället, det ger dimension-storlekar o grejor
 
 
-def iterate_over_tables():
-    page_number = 1
-    while True:
-        response, is_last_page = api_wrapper.get_table_page(page_number)
 
-        print_tables(response)
+def search_for_table(cli_interface, api_wrapper):
+    query = cli_interface.get_input("Query: ")
+    response = api_wrapper.get_tables_by_query(query)
+    choices = []
+    for table in response["tables"]:
+        choice = (table["label"], table["id"])
+        choices.append(choice)
+    table_id = cli_interface.get_choice(choices)
 
-        if is_last_page:
-            break
-        page_number += 1
+    response = api_wrapper.get_table_metadata(table_id)
+    explore_table_metadata(cli_interface, response)
 
 
 def main(stdscr):
     cli_interface = CliInterface(stdscr)
     api_wrapper = ApiWrapper()
-    choices = [f"{i}" for i in range(25)]
-    choice = cli_interface.get_choice(choices)
-    cli_interface.show_lines("Selected choice:", choice)
+    while True:
+        search_for_table(cli_interface, api_wrapper)
 
 
 if __name__ == "__main__":
