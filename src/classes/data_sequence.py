@@ -7,8 +7,7 @@ class DataSequence:
         PREVIOUS = 1
         NEXT = 2
 
-    def __init__(self, title):
-        self.title = title
+    def __init__(self):
         self.sorted_values = []
         self.min_unix_time = 2**32 - 1
         self.max_unix_time = 0
@@ -43,6 +42,13 @@ class DataSequence:
                 return next_value
             case _:
                 return 0
+
+    def get_values(self, unix_time_list, mode=ExtrapolationMode.PREVIOUS):
+        values = []
+        for unix_time in unix_time_list:
+            value = self.get_value(unix_time, mode)
+            values.append(value)
+        return values
 
     def get_previous_or_same_index(self, unix_time):
         return bisect.bisect_right(self.sorted_values, unix_time, key=lambda x: x[0]) - 1
