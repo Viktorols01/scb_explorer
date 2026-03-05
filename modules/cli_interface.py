@@ -9,11 +9,12 @@ class CliInterface:
     def _clear(self):
         self.stdscr.clear()
 
-    def _print(self, row, col, string, attr=curses.A_NORMAL):
-        self.stdscr.addstr(row, col, string, attr)
-    
-    def _print_bold(self, row, col, string):
-        self._print(row, col, string, curses.A_BOLD)
+    def _print(self, string, attr=curses.A_NORMAL, row=None, col=None):
+        string_and_newline = f"{string}\n"
+        if row is None or col is None:
+            self.stdscr.addstr(string_and_newline, attr)
+        else:
+            self.stdscr.addstr(row, col, string_and_newline, attr)
 
     def _get_key(self):
         key = self.stdscr.getkey()
@@ -36,7 +37,7 @@ class CliInterface:
     def get_input(self, message=""):
         curses.echo()  # show typed characters
         self._clear()
-        self._print_bold(0, 0, message)
+        self._print(message, curses.A_BOLD)
         user_input = self.stdscr.getstr().decode("utf-8")
         return user_input
 
@@ -65,22 +66,22 @@ class CliInterface:
             elif ch == '\n':
                 choice_index = page_index * choices_per_page + self.selected_index
                 label, value = choices[choice_index]
-                return value
+                return choice_index, value
             elif ch.isnumeric():
                 choice_index = page_index * choices_per_page + int(ch)
                 label, value = choices[choice_index]
-                return value
+                return choice_index, value
             elif ch == '?':
-                self.show_lines("0-9 - choose using index", "j/k - move selector down/up", "h/l - switch page left/right", "enter - choose using selector")
+                self.show("0-9 - choose using index", "j/k - move selector down/up", "h/l - switch page left/right", "enter - choose using selector")
             elif ch == 'q':
                 exit()
             else:
-                self.show_lines("Unknown character:", ch)
+                self.show("Unknown character:", ch)
             
 
     def _show_choice_page(self, choices, choices_per_page, page_index, page_max_index):
         self._clear()
-        self._print_bold(0, 0, "Select choice:")
+        self._print("Select choice:", curses.A_BOLD)
         for i in range(choices_per_page):
             choice_index = page_index * choices_per_page + i
 
@@ -95,17 +96,17 @@ class CliInterface:
             else:
                 attr = curses.A_NORMAL
             label, value = choices[choice_index]
-            self._print(1 + i, 0, f"{i}: {label}", attr)
+            self._print(f"{i}: {label}", attr)
 
         if page_max_index > 0:
-            self._print_bold(1 + choices_per_page, 0,
-                        f"Page {page_index + 1} of {page_max_index + 1}")
-
-    def show_lines(self, *lines):
-        self._clear()
-        row = 0
-        for line in lines:
-            self._print(row, 0, line)
-            row += 1
-        self._print_bold(row, 0, "Press any character to continue")
+            self._print(f"Page {page_index + 1} of {page_max_index + 1}", curses.A_BOLD)
+    
+    def _get_continue(self):
+        self._print("Press any character to continue", curses.A_BOLD)
         key = self._get_key()
+
+    def show(self, *objs):
+        self._clear()
+        for obj in objs:
+            self._print(obj)
+        self._get_continue()
