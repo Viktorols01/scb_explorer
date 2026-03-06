@@ -52,12 +52,14 @@ def main(stdscr):
     cli_interface = CliInterface(stdscr)
     api_wrapper = ApiWrapper()
     accumulate_tables(cli_interface, api_wrapper)
+    exit()
+
+    #table_id = "TAB1136"
+    table_id = "TAB283"
+    metadata_response = api_wrapper.get_table_metadata(table_id)
+    explore_table_metadata(cli_interface, metadata_response)
 
 
 if __name__ == "__main__":
     wrapper(main)
-    # api_wrapper = ApiWrapper()
-    # table_id = "TAB1136"
-    # response = api_wrapper.get_table_metadata(table_id)
-    # import json
-    # print(json.dumps(response, indent=2))
+
